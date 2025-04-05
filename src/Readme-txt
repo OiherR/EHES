@@ -1,0 +1,109 @@
+0. Gogoratu weka.jar liburutegia gehitzeko proiektuan
+    0.1 lib karpeta sortu
+    0.2 lib karpeta barruan weka.jar sartu
+    0.3 weka.jar gahinean eskuineko botoia sakatu eta "Ad as library" eman
+    0.4 weka liburutegiarekin problemak izaten baduzu terminaleko komandoan gehitu weka.jar oath adieraziz eta inportatu nahi duzun tokiaren patha ere --> -cp "C:\Users\oiher\Desktop\Movies\lib\weka.jar;.\out"
+    0.5 Ikusi hurrengo adibidea: java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED -cp "C:\Users\oiher\Desktop\Movies\lib\weka.jar;.\out" MainModel.jar
+
+1. PROGRAMA NOLA EXEKUTATU (Egiaztatuta JDK 17+)
+Aurre-baldintzak:
+
+JDK azken bertsioak erabili (Weka 3.8.x-ekin bateragarria).
+Konpilatu proiektua , build proyect egin
+Errore tipikoa konpontzeko: JDK 9-tik aurrera, exekutatu honela:
+java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED -jar Programa.jar
+
+Zergatik?: Wekak islapen-erreflexua (reflection) erabiltzen du, eta JDK modernoetan baimenduta egon behar da.
+
+
+2-ARIN EXEKUTATU NAHI BADUZU:
+    1- Modeloa ateratzeko (naive Bayes)
+            -Azkenengo fitxategia NaiveBayes.model izango da
+            -ConfigFile.txt bigarrean linea aldatu non zure train datu sortaren path jarri behar duzu besteak ez dira ikutu behar
+            -MainModel exekutatu , adb:
+            java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED -cp "C:\Users\oiher\Desktop\Movies\lib\weka.jar;.\out" MainModel
+            jar-arekin
+            java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED -jar out/artifacts/MainModel_jar/MainModel.jar
+    2-MainIragarpenak
+            -Azkenengo fitxategia predictions.txt izango da
+            -Kontuz izan behar duzu 14.lerroaren lehenengo bi parametroen path-a inputak direlako , batez ere test_blind-a sortu behar delako , besteak ez dira ikutu behar
+            -MainIragarpenak exekutatu
+            java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED -jar out/artifacts/MainIragarpenak_jar/MainIragarpenak.jar
+
+
+    Begiratu KonfigFilean
+    KonfigFil-a programa bakoitzaren argumentuen jartzen ditu, informazio gehiago behar baduzu , zein inpu edo output den jakiteko pragrama bakoitza ikusi , han ondo adierazten da
+
+3. KARPETA NAGUSIAK ETA PROZESUAK
+    A. Preprocess Karpeta
+        1-GetARFF.java
+        Helburua: .txt fitxategiak .arff formatura bihurtzen ditu.
+        Komandoa: java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED GetArff.java /path/to/txt/files /output/path/trainGordina.arff
+
+        2- GetArffBow.java (StringToWordVector)
+        Helburua: .arff gordina BOW (Bag-of-Words) edo TF-IDF formatura bihurtzen du.
+        Komandoa: java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED GetArffBow.java trainGordina.arff dictionary.txt trainBektoreak.arff [-I] [-N]
+
+        -I: TF-IDF aktibatzeko (defektuz: BOW).
+        -N: Ez-disperso formatura bihurtzeko.
+
+        3-EnsureCompatibility.java
+        Helburua: test_blind.arff train-eko formaturik egokitu.
+        Komandoa:  java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED EnsureCompatibility.java test_blind.arff dictionary.txt testBektoreak.arff
+
+        4- FSS.java (Feature Subset Selection)
+        Helburua: Train dataset-eko atributu onenak aukeratzen ditu.
+
+        Komandoa: java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED FSS.java trainBektoreak.arff fss.arff dictionary.txt [numAtributos]
+
+        numAtributos: Hautazkoa ().
+
+    B. Sailkatzailea Karpeta
+        1-ParametroenBilaketa.java
+
+        Helburua: Bayes Network edo Naive Bayes-rentzat parametro optimoak bilatzen ditu.
+
+        Komandoa: java -jar ParametroenBilaketa.jar fss.arff parametroak.txt "BayesNetwork"
+        edo java  java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED ParametroenBilaketa.java fss.arff parametroak.txt "Naive Bayes"
+
+        2/3- Naive Bayes.java / BayesNetwork.java
+        Helburua: Modeloa entrenatu eta kalitate-txostena (kalitatea.txt) sortu.
+        Komandoa: java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED NaiveBayes.java fss.arff NB.model kalitatea.txt
+
+    C. Iragarpenak Karpeta
+        1- testBlindEguneratu.java
+        Helburua: Test_blind eguneratu train.arff itzuri berdina edukitzeko eta errorik ez emateko.
+        Komandoa: java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED testBlindEguneratu.java fss.arff test_bind_ensureCompatibility.arff testBlindEguneratua.arff
+
+        2-Iragarpenak.java
+        Helburua: Test_blind eta modeloarekin iragarpenak sortu.
+        Komandoa:  java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED Iragarpenak.java fss.model testBlindEguneratua.arff iragarpenak.txt
+
+    D.Moldapenak Karpetan
+        1- devEguneratu.java
+        Helburua: dev eguneratu train.arff itzuri berdina edukitzeko eta kalitatea jakiteko.
+        Komandoa:  java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED devEguneratu.java fss.arff dev.arff output.arff num_predictors
+
+
+4. ONDOREO-BALDINTAZKOAK (Salbuespenak/Murrizpenak)
+
+Datu-formatuak: .arff soilik (Weka-ren formatua).
+
+Liburutegi-menpekotasunak:
+    Weka 3.8.x (JDK 8+ behar du).
+    Ez du Python edo R-ren menpekotasunik.
+
+Sistema-eragile murrizpenak:
+    Bide luzeak dituzten fitxategiak (C:/...)   onartzen dira . Unix-style (/path/to/file) hobetsi.
+
+
+
+5. OHARRAK
+Errore arruntak:
+    Illegal reflective access: JDK 17+ erabiltzen ari bazara eta flags falta badira.
+    ClassNotFoundException: Weka.jar ez dago classpath-ean.
+    FileNotFoundException: Bide okerrak edo fitxategiak falta dira.
+
+Garapenerako: -Xmx4G erabili memoria handiko dataset-ekin (ej: java -Xmx4G -jar ...).
+
+Laburpena: Fitxategi honek programa modu autonomoan exekutatzeko argibide zehatzak ematen ditu, hasi datuak preprozesatutik iragarpenak egiteraino.

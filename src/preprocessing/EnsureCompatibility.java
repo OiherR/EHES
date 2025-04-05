@@ -8,6 +8,7 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.FixedDictionaryStringToWordVector;
 import weka.filters.unsupervised.attribute.Reorder;
 
+
 public class EnsureCompatibility {
 
     public static void main(String[] args) throws Exception {
@@ -20,40 +21,33 @@ public class EnsureCompatibility {
         String dictionaryFile = args[1];
         String outputArff = args[2];
 
-        // Load input dataset
+        // Datuak kargatu
         DataSource source = new DataSource(inputArff);
         Instances data = source.getDataSet();
 
-        // Set class index (last attribute)
+        // Klasearen indizea ezarri (azken atributua)
         data.setClassIndex(data.numAttributes() - 1);
 
-        // Apply FixedDictionaryStringToWordVector
+        // FixedDictionaryStringToWordVector aplikatu
         FixedDictionaryStringToWordVector fdsv = new FixedDictionaryStringToWordVector();
         fdsv.setDictionaryFile(new File(dictionaryFile));
         fdsv.setInputFormat(data);
         Instances filteredData = Filter.useFilter(data, fdsv);
 
-        // Fix: Properly reorder attributes to move class to end
+        // Atributuak berrantolatu klasea amaieran kokatzeko
         if (filteredData.classIndex() >= 0) {
             Reorder reorder = new Reorder();
 
-            // Build attribute indices string:
-            // 1. All attributes except class
-            // 2. Then the class attribute
+            // Atributuen ordena definitu
             String indices = "";
 
-            // Add all attributes before class
             if (filteredData.classIndex() > 0) {
                 indices += "1-" + filteredData.classIndex();
             }
-
-            // Add all attributes after class
             if (filteredData.classIndex() < filteredData.numAttributes() - 1) {
                 if (!indices.isEmpty()) indices += ",";
                 indices += (filteredData.classIndex() + 2) + "-" + filteredData.numAttributes();
             }
-
-            // Finally add the class attribute
             if (!indices.isEmpty()) indices += ",";
             indices += (filteredData.classIndex() + 1);
 
@@ -62,7 +56,7 @@ public class EnsureCompatibility {
             filteredData = Filter.useFilter(filteredData, reorder);
         }
 
-        // Save output
+        // Irteerako fitxategia gorde
         ArffSaver saver = new ArffSaver();
         saver.setInstances(filteredData);
         saver.setFile(new File(outputArff));

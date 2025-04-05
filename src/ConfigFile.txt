@@ -1,0 +1,17 @@
+# Argumentos para GetArff.java
+C:\Users\oiher\Downloads\movies_reviews\train src\Archivos\GetArff.arff
+
+# Argumentos para GetArffBOW.java
+src\Archivos\GetArff.arff src\Archivos\dictionaryBOW.txt src\Archivos\ArffBOW.arff --tfidf --nonsparse
+
+# Argumentos para FSS.java
+src\Archivos\ArffBOW.arff src\Archivos\FSS.arff src\Archivos\dictionaryBOW.txt 1100
+
+# Argumentos para NaiveBayes.java
+src\Archivos\FSS.arff src\Archivos\NaiveBayes.model src\Archivos\kalitateaNaiveBayes.txt 10
+
+# Argumentos para testBlindEguneratu.java
+src\Archivos\FSS.arff C:\Users\oiher\Desktop\ArchivosProjecto\FSDW_test.arff src\Archivos\test_normalized.arff 1100
+
+# Argumentos para Iragarpenak.java
+src\Archivos\NaiveBayes.model src\Archivos\test_normalized.arff src\Archivos\predictions.txt
