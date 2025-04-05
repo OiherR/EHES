@@ -26,6 +26,7 @@ Zergatik?: Wekak islapen-erreflexua (reflection) erabiltzen du, eta JDK modernoe
             java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED -jar out/artifacts/MainModel_jar/MainModel.jar
     2-MainIragarpenak
             -Azkenengo fitxategia predictions.txt izango da
+            -test.arff , ArchivosKarpetan , FSDW_test.arff den artxiboa erabili dezakezu
             -Kontuz izan behar duzu 14.lerroaren lehenengo bi parametroen path-a inputak direlako , batez ere test_blind-a sortu behar delako , besteak ez dira ikutu behar
             -MainIragarpenak exekutatu
             java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED -jar out/artifacts/MainIragarpenak_jar/MainIragarpenak.jar
